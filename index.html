@@ -20,10 +20,10 @@
         </div>
     </div>
 
-    <!-- MAIN WRAPPER (Initially Hidden until unlocked) -->
+    <!-- MAIN WRAPPER -->
     <div id="wrapper" style="display: none;">  
         
-        <!-- MUSIC DISK CONTROLLER (Left Side Floating) -->
+        <!-- MUSIC DISK CONTROLLER -->
         <div class="music-dish-wrapper">
             <div class="music-dish" id="musicDishBtn">
                 <div class="dish-center-hole"></div>
@@ -65,7 +65,8 @@
             <div class="right">  
                 <div class="box__account">  
                     <div class="image">  
-                        <img id="mainAvatarImage" src="./images/unnamed.png" alt="Celebration Image">  
+                        <!-- Default avatar set to first image as fallback -->
+                        <img id="mainAvatarImage" src="./images/IMG_20260507_141033.jpg" alt="Celebration Image">  
                     </div>  
                     <div class="name">  
                         <i class="fa-solid fa-heart"></i>  
@@ -92,7 +93,7 @@
             <div class="video-container-box">  
                 <h3>Our Special Video 🎬</h3>  
                 <video id="birthdayVideoSource" controls loop playsinline>  
-                    <source src="" type="video/mp4">  
+                    <source src="./images/video.mp4" type="video/mp4">  
                 </video>  
             </div>  
               
@@ -124,7 +125,7 @@
                 <div class="birthday-letter-paper">  
                     <div class="letter-header">  
                         <div class="letter-avatar-box">  
-                            <img id="card1ProfileImage" src="images/unnamed.png" alt="">  
+                            <img id="card1ProfileImage" src="./images/IMG_20260507_141033.jpg" alt="">  
                         </div>  
                         <h4 class="to-heading" id="letterTargetHeader">To: Mehwish 💖</h4>  
                         <h3 class="title__letter" id="letterRuntimeTitle">To you</h3>  
@@ -146,8 +147,19 @@
         let datatxtletter = localStorage.getItem('cfgLetterBody') || "My love. You are a very special girl...";  
         let titleLetter = localStorage.getItem('cfgLetterTitle') || "To you";  
         let configNameText = localStorage.getItem('cfgName') || "Dear Mehwish";  
-        let configStaticPara = localStorage.getItem('cfgLetterStatic') || "Happy birthday 🥳🎂🥳 chanda...";  
+        let configStaticPara = localStorage.getItem('cfgLetterStatic') || "Happy birthday 🥳🎂🥳 chanda... ❤️";  
         let targetTimeConfig = localStorage.getItem('cfgTargetTime') || "";
+
+        // GitHub Repository Fallback Files List (from your image folder screenshot)
+        const GitHubFallbackPhotos = [
+            "./images/IMG_20260507_141033.jpg",
+            "./images/IMG_20260511_233333.jpg",
+            "./images/Snapchat-1102102196.jpg",
+            "./images/Snapchat-2091036722.jpg",
+            "./images/Snapchat-264714429.jpg",
+            "./images/Snapchat-49041553.jpg",
+            "./images/Snapchat-54320344.jpg"
+        ];
 
         let globalAudioPlayer = null;
         let isMusicPlaying = false;
@@ -169,7 +181,7 @@
             $('#letterTargetHeader').text("To: " + configNameText.replace("Dear ", "") + " 💖");  
             $('#letterStaticParagraphArea').text(configStaticPara);  
 
-            // Render Wish Wall Comments
+            // Render Wish Wall
             try {
                 let friendsWishes = JSON.parse(localStorage.getItem('cfgFriendsWishes')) || [];
                 let wallContainer = $('#liveWishesWallContainer');
@@ -187,7 +199,7 @@
                 }
             } catch(e) { console.error(e); }
   
-            // COUNTDOWN TIMING SCHEDULER ENGINE
+            // COUNTDOWN ENGINE
             function runCountdownEngine() {
                 if(!targetTimeConfig) {
                     unlockBirthdayPage();
@@ -195,7 +207,6 @@
                 }
 
                 let targetDate = new Date(targetTimeConfig).getTime();
-                
                 let timerInterval = setInterval(function() {
                     let now = new Date().getTime();
                     let difference = targetDate - now;
@@ -227,14 +238,17 @@
                 });
             }
 
-            // MEDIA LOADING PROCESSOR (INDEXEDDB)
+            // MEDIA LOADING PIPELINE
             function initMediaLoadPipeline() {
                 const dbName = "BirthdayMediaExtendedDB";  
                 const dbRequest = indexedDB.open(dbName, 1);  
       
                 dbRequest.onsuccess = function(e) {  
                     let db = e.target.result;  
-                    if (!db.objectStoreNames.contains("heavyMedia")) return;  
+                    if (!db.objectStoreNames.contains("heavyMedia")) {
+                        loadGitHubFolderFallback();
+                        return;
+                    }  
       
                     let tx = db.transaction("heavyMedia", "readonly");  
                     let store = tx.objectStore("heavyMedia");  
@@ -264,50 +278,62 @@
                         try { storedPhotos = JSON.parse(res) || []; } catch(e) {}  
       
                         if(!storedPhotos || storedPhotos.length === 0) {  
-                            gridContainer.innerHTML = `<p style="color: #666; padding: 20px;">Memories grid empty!</p>`;  
+                            loadGitHubPhotosFallback(gridContainer);
                         } else {  
-                            gridContainer.innerHTML = "";  
-                            storedPhotos.forEach(baseStr => {  
-                                const imgNode = document.createElement('img');  
-                                imgNode.src = baseStr;  
-                                gridContainer.appendChild(imgNode);  
-                            });  
-                            gridContainer.addEventListener('scroll', updateCenterPhoto);  
-                            setTimeout(updateCenterPhoto, 400);  
+                            renderPhotosToGrid(storedPhotos, gridContainer);
                         }  
                     };  
       
-                    // MUSIC FILE BUFFER SYSTEM
-                    let localMusicPath = localStorage.getItem('cfgMusicPath');  
-                    if(!localMusicPath) {  
-                        store.get("bgMusicFile").onsuccess = function(event) {  
-                            let res = event.target.result;  
-                            if(res) {  
-                                setupAudioTrack(res);  
-                            }  
-                        };  
-                    } else {  
-                        setupAudioTrack(localMusicPath);  
-                    }  
-                };  
+                    let localMusicPath = localStorage.getItem('cfgMusicPath') || "./images/chubina_song_original(128k).mp3";  
+                    store.get("bgMusicFile").onsuccess = function(event) {  
+                        let res = event.target.result;  
+                        if(res) {  
+                            setupAudioTrack(res);  
+                        } else {  
+                            setupAudioTrack(localMusicPath);  
+                        }  
+                    };  
+                };
+
+                dbRequest.onerror = function() {
+                    loadGitHubFolderFallback();
+                };
+            }
+
+            function loadGitHubFolderFallback() {
+                const gridContainer = document.getElementById('galleryGridDisplay');
+                loadGitHubPhotosFallback(gridContainer);
+                setupAudioTrack("./images/chubina_song_original(128k).mp3");
+            }
+
+            function loadGitHubPhotosFallback(container) {
+                renderPhotosToGrid(GitHubFallbackPhotos, container);
+            }
+
+            function renderPhotosToGrid(photoArray, container) {
+                container.innerHTML = "";  
+                photoArray.forEach(srcStr => {  
+                    const imgNode = document.createElement('img');  
+                    imgNode.src = srcStr;  
+                    container.appendChild(imgNode);  
+                });  
+                container.addEventListener('scroll', updateCenterPhoto);  
+                setTimeout(updateCenterPhoto, 400);  
             }
 
             function setupAudioTrack(srcData) {
                 globalAudioPlayer = new Audio(srcData);
                 globalAudioPlayer.loop = true;
-                
-                // UNLOCK HOTE HI AUTO-PLAY EXECUTION
                 playMusicTrack();
             }
 
-            // MUSIC ACTION HANDLERS
             function playMusicTrack() {
                 if(globalAudioPlayer) {
                     globalAudioPlayer.play().then(() => {
                         isMusicPlaying = true;
                         $('#musicDishBtn').addClass('spinning');
                         $('#dishIcon').removeClass('fa-play').addClass('fa-pause');
-                    }).catch(err => console.log("Autoplay bound block active: waiting for click interaction."));
+                    }).catch(err => console.log("Autoplay block handle."));
                 }
             }
 
@@ -315,12 +341,11 @@
                 if(globalAudioPlayer) {
                     globalAudioPlayer.pause();
                     isMusicPlaying = false;
-                    $('#musicDishBtn').removeClass('spinning');
+                    $('#musicDishBtn').removeClass('removeClass').removeClass('spinning');
                     $('#dishIcon').removeClass('fa-pause').addClass('fa-play');
                 }
             }
 
-            // DISH CLICK HANDLER
             $('#musicDishBtn').click(function() {
                 if(isMusicPlaying) {
                     pauseMusicTrack();
@@ -356,7 +381,6 @@
             }  
         });  
   
-        // TYPEWRITER LAUNCH MATRIX
         function startTypewriterTrigger() {
             setTimeout(function () {  
                 timeDatetxt = setInterval(function () {  
@@ -373,7 +397,7 @@
                         clearInterval(timeDatetxt);  
                     }  
                 }, 100);  
-            }, 5000);  // Unlocked screen timing offset balance
+            }, 5000);  
         }
   
         var intervalContent;  
