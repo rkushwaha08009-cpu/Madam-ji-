@@ -181,16 +181,16 @@
         let globalWishesArray = [];  
   
         $(document).ready(function() {  
-            // Setup Initial Selected Theme View
-            let savedTheme = localStorage.getItem('cfgThemeMode') || "normal";
-            $(`input[value="${savedTheme}"]`).prop('checked', true);
-            $(`input[value="${savedTheme}"]`).closest('.theme-option').addClass('selected');
+            // Setup Initial Selected Theme View  
+            let savedTheme = localStorage.getItem('cfgThemeMode') || "normal";  
+            $(`input[value="${savedTheme}"]`).prop('checked', true);  
+            $(`input[value="${savedTheme}"]`).closest('.theme-option').addClass('selected');  
 
-            $('.theme-option').click(function() {
-                $('.theme-option').removeClass('selected');
-                $(this).addClass('selected');
-                $(this).find('input').prop('checked', true);
-            });
+            $('.theme-option').click(function() {  
+                $('.theme-option').removeClass('selected');  
+                $(this).addClass('selected');  
+                $(this).find('input').prop('checked', true);  
+            });  
 
             $('#cfgName').val(localStorage.getItem('cfgName') || "Dear Mehwish");  
             $('#cfgDOB').val(localStorage.getItem('cfgDOB') || "27 May");  
@@ -279,18 +279,17 @@
             });  
   
             $('#saveGlobalConfigBtn').click(function() {  
-                let activeThemeValue = $('input[name="themeMode"]:checked').val();
+                let activeThemeValue = $('input[name="themeMode"]:checked').val();  
                 
-                // Switch Check: If target mode changes, clear the manual IndexedDB gallery stack so system fallbacks trigger
-                if(activeThemeValue !== localStorage.getItem('cfgThemeMode')) {
-                    localStorage.setItem('forceDynamicOverride', 'true');
-                    if(db) {
-                        let fallbackTx = db.transaction("heavyMedia", "readwrite");
-                        fallbackTx.objectStore("heavyMedia").delete("galleryPhotos");
-                    }
-                }
+                if(activeThemeValue !== localStorage.getItem('cfgThemeMode')) {  
+                    localStorage.setItem('forceDynamicOverride', 'true');  
+                    if(db) {  
+                        let fallbackTx = db.transaction("heavyMedia", "readwrite");  
+                        fallbackTx.objectStore("heavyMedia").delete("galleryPhotos");  
+                    }  
+                }  
 
-                localStorage.setItem('cfgThemeMode', activeThemeValue);
+                localStorage.setItem('cfgThemeMode', activeThemeValue);  
                 localStorage.setItem('cfgName', $('#cfgName').val());  
                 localStorage.setItem('cfgDOB', $('#cfgDOB').val());  
                 localStorage.setItem('cfgTargetTime', $('#cfgTargetTime').val());  
