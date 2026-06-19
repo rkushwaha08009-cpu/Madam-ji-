@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celebration Admin Control Panel</title>
+    <link rel="stylesheet" href="vfx.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=400;600&family=Sriracha&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        /* Panel specific layout tweaks keeping the same premium theme */
+        .admin-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #ffffff;
+            border: 4px solid #333;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 0 #333;
+        }
+        .admin-title {
+            font-family: 'Sriracha', cursive;
+            color: #FF7882;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #333;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            background: #fff8e4;
+            box-shadow: inset 0 3px 0 rgba(0,0,0,0.05);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .admin-btn {
+            width: 100%;
+            background: #FF7882;
+            color: white;
+            border: 4px solid #333;
+            border-radius: 50px;
+            padding: 14px;
+            font-family: 'Sriracha', cursive;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #333;
+            transition: all 0.1s ease;
+            margin-top: 15px;
+        }
+        .admin-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #333;
+        }
+        .status-msg {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+            color: #2ecc71;
+        }
+        .view-page-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+        .wish-list-item {
+            background: #fff;
+            border: 2px solid #333;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-wish-btn {
+            background: #ff4757;
+            color: white;
+            border: 2px solid #333;
+            padding: 2px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <h1 class="admin-title"><i class="fa-solid fa-gears"></i> Setup Panel</h1>
+        
+        <form id="adminControlForm">
+            <div class="form-group">
+                <label><i class="fa-solid fa-user"></i> Birthday Person Name:</label>
+                <input type="text" id="cfgName" placeholder="e.g., Dear Mehwish">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-calendar-days"></i> Rounded Pill Date Content:</label>
+                <input type="text" id="cfgDOB" placeholder="e.g., 12 December">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-clock"></i> Unlock Target Time (Optional):</label>
+                <input type="datetime-local" id="cfgTargetTime">
+                <p style="font-size:0.8rem; color:#666; margin-top:4px;">Khaali chhodne par bina countdown ke direct page open hoga.</p>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-heading"></i> Popup Letter Title:</label>
+                <input type="text" id="cfgLetterTitle" placeholder="e.g., To you">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-envelope-open-text"></i> Letter Content (Typewriter Animation):</label>
+                <textarea id="cfgLetterBody" placeholder="Type the special dynamic message here..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-paragraph"></i> Bottom Message (Static Paragraph):</label>
+                <textarea id="cfgLetterStatic" placeholder="e.g., Happy birthday chanda... ❤️"></textarea>
+            </div>
+
+            <div class="form-group" style="border-top: 2px dashed #333; padding-top: 15px; margin-top: 25px;">
+                <label style="color: #FF7882;"><i class="fa-solid fa-comment-medical"></i> Add Friend's Wish to Wall:</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="friendNameInput" placeholder="Friend's Name" style="width: 35%;">
+                    <input type="text" id="friendTextInput" placeholder="Birthday Message..." style="width: 65%;">
+                </div>
+                <button type="button" id="addWishWallBtn" class="admin-btn" style="margin-top:0; font-size:1rem; padding:8px;">Add To Wall 💬</button>
+                
+                <div id="adminWishesPreview" style="margin-top: 15px; max-height: 150px; overflow-y: auto;">
+                    </div>
+            </div>
+
+            <div class="form-group" style="border-top: 2px dashed #333; padding-top: 15px; margin-top: 25px;">
+                <label><i class="fa-solid fa-photo-film"></i> Local Storage File Track Overrides (Advanced):</label>
+                <div style="margin-bottom: 10px;">
+                    <span style="font-size:0.85rem; font-weight:bold;">Custom Music File Path:</span>
+                    <input type="text" id="cfgMusicPath" placeholder="e.g., ./images/custom_song.mp3">
+                </div>
+                <div>
+                    <span style="font-size:0.85rem; font-weight:bold;">Custom Video File Path:</span>
+                    <input type="text" id="cfgVideoPath" placeholder="e.g., ./images/custom_video.mp4">
+                </div>
+            </div>
+
+            <button type="submit" class="admin-btn">Save All Configurations ✨</button>
+        </form>
+
+        <div class="status-msg" id="saveStatus">Configuration Saved Successfully!</div>
+        
+        <a href="wish.html" class="view-page-link" target="_blank"><i class="fa-solid fa-eye"></i> View Updated Wish Page</a>
+    </div>
+
+    <script>
+        let friendsWishesMemory = [];
+
+        $(document).ready(function() {
+            // Load existing configurations inside localStorage
+            $('#cfgName').val(localStorage.getItem('cfgName') || "Dear Mehwish");
+            $('#cfgDOB').val(localStorage.getItem('cfgDOB') || "12 December");
+            $('#cfgTargetTime').val(localStorage.getItem('cfgTargetTime') || "");
+            $('#cfgLetterTitle').val(localStorage.getItem('cfgLetterTitle') || "To you");
+            $('#cfgLetterBody').val(localStorage.getItem('cfgLetterBody') || "My love. You are a very special girl...");
+            $('#cfgLetterStatic').val(localStorage.getItem('cfgLetterStatic') || "Happy birthday 🥳🎂🥳 chanda... ❤️");
+            $('#cfgMusicPath').val(localStorage.getItem('cfgMusicPath') || "");
+            $('#cfgVideoPath').val(localStorage.getItem('cfgVideoPath') || "");
+
+            try {
+                friendsWishesMemory = JSON.parse(localStorage.getItem('cfgFriendsWishes')) || [];
+                renderWishesPreviewList();
+            } catch(e) { friendsWishesMemory = []; }
+
+            // Add item to wish wall array temporary storage
+            $('#addWishWallBtn').click(function() {
+                let fName = $('#friendNameInput').val().trim();
+                let fText = $('#friendTextInput').val().trim();
+
+                if(!fName || !fText) {
+                    alert("Please fill both Friend's Name and Message!");
+                    return;
+                }
+
+                friendsWishesMemory.push({ name: fName, text: fText });
+                $('#friendNameInput').val('');
+                $('#friendTextInput').val('');
+                renderWishesPreviewList();
+            });
+
+            // Handle deletion inside view panel
+            window.deleteWishItem = function(index) {
+                friendsWishesMemory.splice(index, 1);
+                renderWishesPreviewList();
+            };
+
+            function renderWishesPreviewList() {
+                let container = $('#adminWishesPreview');
+                container.innerHTML = "";
+                let htmlOutput = "";
+                friendsWishesMemory.forEach((item, index) => {
+                    htmlOutput += `
+                        <div class="wish-list-item">
+                            <span><strong>${item.name}</strong>: ${item.text.substring(0, 30)}...</span>
+                            <button type="button" class="delete-wish-btn" onclick="deleteWishItem(${index})"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                });
+                container.html(htmlOutput);
+            }
+
+            // Save all configurations function
+            $('#adminControlForm').submit(function(e) {
+                e.preventDefault();
+
+                localStorage.setItem('cfgName', $('#cfgName').val().trim());
+                localStorage.setItem('cfgDOB', $('#cfgDOB').val().trim());
+                localStorage.setItem('cfgTargetTime', $('#cfgTargetTime').val());
+                localStorage.setItem('cfgLetterTitle', $('#cfgLetterTitle').val().trim());
+                localStorage.setItem('cfgLetterBody', $('#cfgLetterBody').val().trim());
+                localStorage.setItem('cfgLetterStatic', $('#cfgLetterStatic').val().trim());
+                localStorage.setItem('cfgMusicPath', $('#cfgMusicPath').val().trim());
+                localStorage.setItem('cfgVideoPath', $('#cfgVideoPath').val().trim());
+                
+                // Save complete wish wall array
+                localStorage.setItem('cfgFriendsWishes', JSON.stringify(friendsWishesMemory));
+
+                $('#saveStatus').fadeIn().delay(2000).fadeOut();
+            });
+        });
+    </script>
+</body>
+</html>
