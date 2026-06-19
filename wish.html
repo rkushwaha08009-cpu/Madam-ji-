@@ -4,32 +4,38 @@
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
     <title>Happy Birthday Celebration</title>  
-    <link rel="stylesheet" href="style.css">  
+    <link rel="stylesheet" href="vfx.css">  
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />  
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght=500;700&family=Poppins:wght=400;600&family=Titan+One&family=Sriracha&display=swap" rel="stylesheet">  
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>  
 </head>  
 <body>  
 
-    <!-- COUNTDOWN LOCK SCREEN OVERLAY -->
     <div id="lockScreenOverlay" class="lock-overlay">
         <div class="lock-box">
             <h2 id="lockGreeting">Something Special is Waiting... ✨</h2>
             <div class="countdown-timer-display" id="timerNumbers">00d : 00h : 00m : 00s</div>
             <p class="lock-status-msg">The celebration will automatically unlock at the scheduled time!</p>
+            
+            <div class="lock-music-control-box">
+                <div class="music-dish standard-dish-layout spinning" id="lockMusicBtn">
+                    <div class="dish-center-hole"></div>
+                    <i class="fa-solid fa-play" id="lockPlayIcon"></i>
+                    <i class="fa-solid fa-pause" id="lockPauseIcon"></i>
+                </div>
+                <span class="music-tooltip">Ambient Timer Track</span>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN WRAPPER -->
     <div id="wrapper" style="display: none;">  
         
-        <!-- MUSIC DISK CONTROLLER -->
         <div class="music-dish-wrapper">
-            <div class="music-dish" id="musicDishBtn">
+            <div class="music-dish standard-dish-layout" id="musicDishBtn">
                 <div class="dish-center-hole"></div>
-                <i class="fa-solid fa-play" id="dishIcon"></i>
+                <i class="fa-solid fa-play" id="mainPlayIcon"></i>
+                <i class="fa-solid fa-pause" id="mainPauseIcon"></i>
             </div>
-            <span class="music-tooltip">Music Control</span>
         </div>
 
         <div class="flag__birthday">  
@@ -50,9 +56,11 @@
                         <img src="./images/hat.png" alt="" width="130">  
                     </div>  
                 </div>  
+                
                 <div class="date__of__birth">  
                     <span></span>  
                 </div>  
+
                 <div class="btn">  
                     <button id="btn__letter">  
                         <div class="mail">  
@@ -65,7 +73,6 @@
             <div class="right">  
                 <div class="box__account">  
                     <div class="image">  
-                        <!-- Default avatar set to first image as fallback -->
                         <img id="mainAvatarImage" src="./images/love3.jpg" alt="Celebration Image">  
                     </div>  
                     <div class="name">  
@@ -106,6 +113,12 @@
                 <h3>Friends Wish Wall 💬</h3>
                 <div id="liveWishesWallContainer" style="display: flex; flex-direction: column; gap: 15px; text-align: left; padding: 10px; max-height: 300px; overflow-y: auto;"></div>
             </div>
+
+            <div class="cake-cutting-gateway-box">
+                <a href="./cake/cake.html" class="btn-cake-gateway">
+                    <i class="fa-solid fa-cake-candles"></i> Proceed to Cake Cutting Ceremony 🎂✨
+                </a>
+            </div>
         </div>  
   
         <div class="decorate_star star1"></div>  
@@ -126,7 +139,7 @@
                     <div class="letter-header">  
                         <div class="letter-avatar-box">  
                             <img id="card1ProfileImage" src="./images/love3.jpg" alt="">
-                            </div>  
+                        </div>  
                         <h4 class="to-heading" id="letterTargetHeader">To: Mehwish 💖</h4>  
                         <h3 class="title__letter" id="letterRuntimeTitle">To you</h3>  
                     </div>  
@@ -143,26 +156,21 @@
     </div>  
   
     <script>  
-        let datetxt = localStorage.getItem('cfgDOB') || "27 May";  
+        let datetxt = localStorage.getItem('cfgDOB') || "12 December";  
         let datatxtletter = localStorage.getItem('cfgLetterBody') || "My love. You are a very special girl...";  
         let titleLetter = localStorage.getItem('cfgLetterTitle') || "To you";  
         let configNameText = localStorage.getItem('cfgName') || "Dear Mehwish";  
         let configStaticPara = localStorage.getItem('cfgLetterStatic') || "Happy birthday 🥳🎂🥳 chanda... ❤️";  
         let targetTimeConfig = localStorage.getItem('cfgTargetTime') || "";
 
-        // GitHub Repository Fallback Files List (from your image folder screenshot)
         const GitHubFallbackPhotos = [
-            "./images/love1.jpg",
-            "./images/love2.jpg",
-            "./images/love3.jpg",
-            "./images/love4.jpg",
-            "./images/love5.jpg",
-            "./images/love6.jpg",
-            "./images/love7.jpg"
+            "./images/love1.jpg", "./images/love2.jpg", "./images/love3.jpg",
+            "./images/love4.jpg", "./images/love5.jpg", "./images/love6.jpg", "./images/love7.jpg"
         ];
 
         let globalAudioPlayer = null;
         let isMusicPlaying = false;
+        let isPageUnlocked = false;
   
         let charArrDate = datetxt.split('');  
         let charArrDateLetter = datatxtletter.split('');  
@@ -181,7 +189,6 @@
             $('#letterTargetHeader').text("To: " + configNameText.replace("Dear ", "") + " 💖");  
             $('#letterStaticParagraphArea').text(configStaticPara);  
 
-            // Render Wish Wall
             try {
                 let friendsWishes = JSON.parse(localStorage.getItem('cfgFriendsWishes')) || [];
                 let wallContainer = $('#liveWishesWallContainer');
@@ -199,7 +206,8 @@
                 }
             } catch(e) { console.error(e); }
   
-            // COUNTDOWN ENGINE
+            setupAudioTrack("./images/timer.mp3", true); 
+
             function runCountdownEngine() {
                 if(!targetTimeConfig) {
                     unlockBirthdayPage();
@@ -230,15 +238,21 @@
             runCountdownEngine();
 
             function unlockBirthdayPage() {
+                isPageUnlocked = true;
+                
+                if(globalAudioPlayer) {
+                    globalAudioPlayer.pause();
+                    globalAudioPlayer = null;
+                }
+
                 $('#lockScreenOverlay').fadeOut(800, function() {
                     $(this).remove();
                     $('#wrapper').show();
-                    initMediaLoadPipeline();
+                    initMediaLoadPipeline(); 
                     startTypewriterTrigger();
                 });
             }
 
-            // MEDIA LOADING PIPELINE
             function initMediaLoadPipeline() {
                 const dbName = "BirthdayMediaExtendedDB";  
                 const dbRequest = indexedDB.open(dbName, 1);  
@@ -288,9 +302,9 @@
                     store.get("bgMusicFile").onsuccess = function(event) {  
                         let res = event.target.result;  
                         if(res) {  
-                            setupAudioTrack(res);  
+                            setupAudioTrack(res, false);  
                         } else {  
-                            setupAudioTrack(localMusicPath);  
+                            setupAudioTrack(localMusicPath, false);  
                         }  
                     };  
                 };
@@ -303,7 +317,7 @@
             function loadGitHubFolderFallback() {
                 const gridContainer = document.getElementById('galleryGridDisplay');
                 loadGitHubPhotosFallback(gridContainer);
-                setupAudioTrack("./images/chubina_song_original(128k).mp3");
+                setupAudioTrack("./images/chubina_song_original(128k).mp3", false);
             }
 
             function loadGitHubPhotosFallback(container) {
@@ -321,37 +335,45 @@
                 setTimeout(updateCenterPhoto, 400);  
             }
 
-            function setupAudioTrack(srcData) {
-                globalAudioPlayer = new Audio(srcData);
-                globalAudioPlayer.loop = true;
-                playMusicTrack();
-            }
-
-            function playMusicTrack() {
-                if(globalAudioPlayer) {
-                    globalAudioPlayer.play().then(() => {
-                        isMusicPlaying = true;
-                        $('#musicDishBtn').addClass('spinning');
-                        $('#dishIcon').removeClass('fa-play').addClass('fa-pause');
-                    }).catch(err => console.log("Autoplay block handle."));
-                }
-            }
-
-            function pauseMusicTrack() {
+            function setupAudioTrack(srcData, isTimerTrack) {
                 if(globalAudioPlayer) {
                     globalAudioPlayer.pause();
+                }
+                globalAudioPlayer = new Audio(srcData);
+                globalAudioPlayer.loop = true;
+                
+                globalAudioPlayer.play().then(() => {
+                    isMusicPlaying = true;
+                    if(isTimerTrack) {
+                        $('#lockMusicBtn').addClass('spinning');
+                    } else {
+                        $('#musicDishBtn').addClass('spinning');
+                    }
+                }).catch(err => {
                     isMusicPlaying = false;
-                    $('#musicDishBtn').removeClass('removeClass').removeClass('spinning');
-                    $('#dishIcon').removeClass('fa-pause').addClass('fa-play');
+                    $('.standard-dish-layout').removeClass('spinning');
+                });
+            }
+
+            function toggleAudioSystem(btnId) {
+                if(!globalAudioPlayer) return;
+                if(isMusicPlaying) {
+                    globalAudioPlayer.pause();
+                    isMusicPlaying = false;
+                    $(btnId).removeClass('spinning');
+                } else {
+                    globalAudioPlayer.play();
+                    isMusicPlaying = true;
+                    $(btnId).addClass('spinning');
                 }
             }
 
+            $('#lockMusicBtn').click(function() {
+                toggleAudioSystem('#lockMusicBtn');
+            });
+
             $('#musicDishBtn').click(function() {
-                if(isMusicPlaying) {
-                    pauseMusicTrack();
-                } else {
-                    playMusicTrack();
-                }
+                toggleAudioSystem('#musicDishBtn');
             });
   
             function updateCenterPhoto() {  
@@ -385,7 +407,7 @@
             setTimeout(function () {  
                 timeDatetxt = setInterval(function () {  
                     if (currentIndex < charArrDate.length) {  
-                        date__of__birth.textContent += charArrDate[currentIndex];  
+                        date__of__birth.querySelector("span").textContent += charArrDate[currentIndex];  
                         currentIndex++;  
                     } else {  
                         let i = document.createElement("i");  
@@ -396,7 +418,7 @@
                         }  
                         clearInterval(timeDatetxt);  
                     }  
-                }, 100);  
+                }, 130);  
             }, 5000);  
         }
   
